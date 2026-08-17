@@ -24,8 +24,9 @@ def get_best_move(grid, depth=2):
     best_score = -math.inf
     best_move = None
     
-    # Xóa cache cũ mỗi lần đi nước mới để tránh tốn RAM quá nhiều
-    transposition_table.clear() 
+    # Giới hạn kích thước cache để không bị tràn RAM, nhưng giữ lại tính toán trước đó
+    if len(transposition_table) > 100000:
+        transposition_table.clear() 
     
     # Sắp xếp thứ tự nước đi: Thử đi các hướng "ngon ăn" trước (Heuristic cao)
     # Kỹ thuật này gọi là "Move Ordering" - Giúp cắt tỉa nhanh hơn
@@ -96,7 +97,7 @@ def expectimax(grid, depth, is_maximizing):
         
         for r, c in cells_to_check:
             # Xét trường hợp ra số 2 (Trọng số 0.9)
-            grid_2 = copy.deepcopy(grid)
+            grid_2 = [row[:] for row in grid] # Nhanh hơn deepcopy rất nhiều
             grid_2[r][c] = 2
             total_score += 0.9 * expectimax(grid_2, depth - 1, is_maximizing=True)
             weight_sum += 0.9
@@ -104,7 +105,7 @@ def expectimax(grid, depth, is_maximizing):
             # Xét trường hợp ra số 4 (Trọng số 0.1)
             # Chỉ xét số 4 khi depth còn cao, nếu depth thấp bỏ qua để nhanh
             if depth > 1:
-                grid_4 = copy.deepcopy(grid)
+                grid_4 = [row[:] for row in grid]
                 grid_4[r][c] = 4
                 total_score += 0.1 * expectimax(grid_4, depth - 1, is_maximizing=True)
                 weight_sum += 0.1
